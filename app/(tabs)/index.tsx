@@ -1,86 +1,34 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 
 import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
+import {SvgXml} from "react-native-svg";
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const svgEscapado = "\u003Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 130 98\" width=\"130px\" version=\"1.1\" height=\"98px\"\u003E\n\t\u003Cg transform=\"matrix(1.0,0.0,0.0,1.0,0.5,0.5)\"\u003E\n\t\t\u003Crect x=\"2.0\" width=\"10.0\" y=\"34.0\" fill=\"#0000ff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"12.0\" width=\"10.0\" y=\"34.0\" fill=\"#ff0000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"22.0\" width=\"10.0\" y=\"34.0\" fill=\"#0000ff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"2.0\" width=\"10.0\" y=\"44.0\" fill=\"#ffffff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"12.0\" width=\"10.0\" y=\"44.0\" fill=\"#ff8000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"22.0\" width=\"10.0\" y=\"44.0\" fill=\"#ffff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"2.0\" width=\"10.0\" y=\"54.0\" fill=\"#00ff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"12.0\" width=\"10.0\" y=\"54.0\" fill=\"#ff0000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"22.0\" width=\"10.0\" y=\"54.0\" fill=\"#ff0000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"34.0\" width=\"10.0\" y=\"66.0\" fill=\"#ffff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"44.0\" width=\"10.0\" y=\"66.0\" fill=\"#ff8000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"54.0\" width=\"10.0\" y=\"66.0\" fill=\"#0000ff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"34.0\" width=\"10.0\" y=\"76.0\" fill=\"#ffffff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"44.0\" width=\"10.0\" y=\"76.0\" fill=\"#ffff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"54.0\" width=\"10.0\" y=\"76.0\" fill=\"#ff0000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"34.0\" width=\"10.0\" y=\"86.0\" fill=\"#ff8000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"44.0\" width=\"10.0\" y=\"86.0\" fill=\"#ffffff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"54.0\" width=\"10.0\" y=\"86.0\" fill=\"#00ff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"98.0\" width=\"10.0\" y=\"34.0\" fill=\"#ffff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"108.0\" width=\"10.0\" y=\"34.0\" fill=\"#ffffff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"118.0\" width=\"10.0\" y=\"34.0\" fill=\"#ffffff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"98.0\" width=\"10.0\" y=\"44.0\" fill=\"#ffff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"108.0\" width=\"10.0\" y=\"44.0\" fill=\"#0000ff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"118.0\" width=\"10.0\" y=\"44.0\" fill=\"#00ff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"98.0\" width=\"10.0\" y=\"54.0\" fill=\"#ff0000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"108.0\" width=\"10.0\" y=\"54.0\" fill=\"#ff8000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"118.0\" width=\"10.0\" y=\"54.0\" fill=\"#ffffff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"66.0\" width=\"10.0\" y=\"34.0\" fill=\"#ffff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"76.0\" width=\"10.0\" y=\"34.0\" fill=\"#ff8000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"86.0\" width=\"10.0\" y=\"34.0\" fill=\"#00ff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"66.0\" width=\"10.0\" y=\"44.0\" fill=\"#ffff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"76.0\" width=\"10.0\" y=\"44.0\" fill=\"#ff0000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"86.0\" width=\"10.0\" y=\"44.0\" fill=\"#ff8000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"66.0\" width=\"10.0\" y=\"54.0\" fill=\"#ffffff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"76.0\" width=\"10.0\" y=\"54.0\" fill=\"#ffff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"86.0\" width=\"10.0\" y=\"54.0\" fill=\"#ffffff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"34.0\" width=\"10.0\" y=\"2.0\" fill=\"#ff8000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"44.0\" width=\"10.0\" y=\"2.0\" fill=\"#0000ff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"54.0\" width=\"10.0\" y=\"2.0\" fill=\"#ff0000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"34.0\" width=\"10.0\" y=\"12.0\" fill=\"#00ff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"44.0\" width=\"10.0\" y=\"12.0\" fill=\"#ffffff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"54.0\" width=\"10.0\" y=\"12.0\" fill=\"#00ff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"34.0\" width=\"10.0\" y=\"22.0\" fill=\"#ff8000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"44.0\" width=\"10.0\" y=\"22.0\" fill=\"#0000ff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"54.0\" width=\"10.0\" y=\"22.0\" fill=\"#00ff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"34.0\" width=\"10.0\" y=\"34.0\" fill=\"#ffff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"44.0\" width=\"10.0\" y=\"34.0\" fill=\"#ff0000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"54.0\" width=\"10.0\" y=\"34.0\" fill=\"#ff8000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"34.0\" width=\"10.0\" y=\"44.0\" fill=\"#00ff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"44.0\" width=\"10.0\" y=\"44.0\" fill=\"#00ff00\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"54.0\" width=\"10.0\" y=\"44.0\" fill=\"#0000ff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"34.0\" width=\"10.0\" y=\"54.0\" fill=\"#0000ff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"44.0\" width=\"10.0\" y=\"54.0\" fill=\"#0000ff\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\t\u003Crect x=\"54.0\" width=\"10.0\" y=\"54.0\" fill=\"#ff0000\" stroke=\"#000000\" height=\"10.0\"\u003E\n\t\t\u003C/rect\u003E\n\t\u003C/g\u003E\n\u003C/svg\u003E";
+  const svg = svgEscapado
+    .replace(/\\u003C/g, "<")
+    .replace(/\\u003E/g, ">")
+    .replace(/\\"/g, '"')
+    .replace(/\\n/g, "");
+
+  return (
+    <View style={styles.titleContainer}>
+      <Text style={{color:"white"}}>Feed</Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   titleContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column',
+    flex: 1,
+    justifyContent: "center",
     alignItems: 'center',
     gap: 8,
   },

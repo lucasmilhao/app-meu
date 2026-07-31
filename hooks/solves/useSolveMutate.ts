@@ -1,0 +1,30 @@
+import { SolveRequest } from "@/app/interface/SolveRequest";
+import { api } from "@/app/service/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { type AxiosPromise } from "axios"
+
+interface SolveProps {
+    tempo : number,
+    scramble : string,
+    penalty : string,
+    userId : string,
+    partidaId : string
+}
+
+const fetchData = async (data : SolveRequest) : AxiosPromise<SolveProps> => {
+    const response = api.post(`/solves`, data);
+
+    return response;
+} 
+
+
+export function useSolveMutate(){
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: fetchData, 
+        retry: 2,
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey : ["solves-data"]})
+        }
+    })
+}
