@@ -1,293 +1,571 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { isAxiosError } from "axios";
-import { useRouter } from "expo-router";
-import { useMemo, useRef, useState } from "react";
+
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  Alert,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { Palette, type ThemePalette } from "@/constants/pallete";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useUsuarioLogin } from "@/hooks/usuario/useUsuarioLogin";
+import { puzzles, segundos } from "../Practice";
+import { useSolveDataUser } from "../../hooks/solves/useSolveDataUser";
+import { useUsuarioLogado } from "../../hooks/usuario/useUsuarioLogado";
+import { useFollowSeguindoData } from "../../hooks/follow/useFollowSeguindoData";
+import { useFollowSeguidoresData } from "../../hooks/follow/useFollowSeguidoresData";
+import {
+  useFollowCreate,
+  type FollowRequest,
+} from "../../hooks/follow/useFollowCreate";
+import { useFollowStatus } from "../../hooks/follow/useFollowStatus";
+import { usePostagemUsuario } from "../../hooks/postagem/usePostagemUsuario";
+import { useConversaCreate } from "../../hooks/chat/conversa/useConversaCreate";
+import { useUsuarioUsername } from "../../hooks/usuario/useUsuarioUsername";
+import type { ConversaRequestProps } from "../../interface/ConversaRequestProps";
 
-const APP_NAME = "Cubing2gether";
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Substitua pelos componentes compatíveis com React Native do seu projeto.
+import { ModalPerfilNative } from "../../components/modal/ModalPerfilNative";
+import { SolveChartNative } from "../../components/chart/SolveChartNative";
+import { PostCardNative } from "../../components/postagem/PostCardNative";
+import PostagemProps from "../interface/PostagemProps";
 
-function mensagemDeErro(error: unknown) {
-  if (isAxiosError(error)) {
-    if (!error.response) {
-      return "Não foi possível conectar ao servidor. Verifique sua conexão.";
-    }
-    if ([400, 401, 403, 404].includes(error.response.status)) {
-      return "E-mail ou senha incorretos.";
-    }
-  }
-  return "Algo deu errado. Tente novamente em instantes.";
+const puzzleNames: Record<string, string> = {
+  "3x3x3": "THREE",
+  "2x2x2": "TWO",
+  "4x4x4": "FOUR",
+  "5x5x5": "FIVE",
+  "6x6x6": "SIX",
+  "7x7x7": "SEVEN",
+  square1: "SQ1",
+  megaminx: "MEGA",
+  clock: "CLOCK",
+  skewb: "SKEWB",
+  pyraminx: "PYRA",
+};
+
+function getTypeCubo(cubo: string): string {
+  return puzzleNames[cubo] ?? "Desconhecido";
 }
 
-export default function Login() {
+export default function Usuario() {
   const router = useRouter();
-  const colors = Palette[useColorScheme() === "dark" ? "dark" : "light"];
-  const styles = useMemo(() => makeStyles(colors), [colors]);
-  const login = useUsuarioLogin();
+  const { username, postId } = useLocalSearchParams<{
+    username: string;
+    postId?: string;
+  }>();
 
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [focado, setFocado] = useState<"email" | "senha" | null>(null);
-  const [erro, setErro] = useState<string | null>(null);
-  const senhaRef = useRef<TextInput>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const postPositions = useRef<Record<string, number>>({});
 
-  // As rotas /register e /recuperar-senha ainda não existem no app;
-  // o cast evita erro do typedRoutes até você criá-las.
-  const irPara = (rota: string) => router.push(rota as never);
+  const {
+    data: usuario,
+    isLoading,
+    isError,
+    error,
+  } = useUsuarioUsername(username ?? "");
 
-  const entrar = () => {
-    if (login.isPending) return;
+  const idUsuario = usuario?.id;
 
-    if (!EMAIL_REGEX.test(email.trim())) {
-      setErro("Digite um e-mail válido.");
+  const { data: usuarioLogado, isError: erroUsuario } =
+    useUsuarioLogado();
+
+  const { data: seguindo } = useFollowSeguindoData(idUsuario);
+  const { data: seguidores } = useFollowSeguidoresData(idUsuario);
+  const { data: postagens } = usePostagemUsuario(idUsuario);
+
+  const { mutate: seguir, isPending: carregandoSeguir } =
+    useFollowCreate();
+
+  const { data: followStatus } = useFollowStatus(idUsuario);
+  const { data: solveUser } = useSolveDataUser(idUsuario);
+  const { mutate: conversa } = useConversaCreate();
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [puzzle, setPuzzle] = useState(puzzles[1]);
+  const [nome, setNome] = useState("");
+  const [image, setImage] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (usuario?.nome) setNome(usuario.nome);
+    if (usuario?.picture) setImage(usuario.picture);
+  }, [usuario?.nome, usuario?.picture]);
+
+  useEffect(() => {
+    if (erroUsuario) {
+      router.replace("/auth/login");
+    }
+  }, [erroUsuario, router]);
+
+  useEffect(() => {
+    if (!postId) return;
+
+    const y = postPositions.current[String(postId)];
+
+    if (y !== undefined) {
+      scrollRef.current?.scrollTo({
+        y: Math.max(0, y - 100),
+        animated: true,
+      });
+    }
+  }, [postId, postagens]);
+
+  const isUsuarioLogado = usuarioLogado?.id === idUsuario;
+  const isConvidado = usuarioLogado?.isGuest === true;
+
+  const followInfo = useMemo(() => {
+    if (!followStatus) return "Seguir";
+
+    if (followStatus.sigo && followStatus.meSegue) return "Amigos";
+    if (followStatus.sigo) return "Seguindo";
+    if (followStatus.meSegue) return "Seguir de volta";
+
+    return "Seguir";
+  }, [followStatus]);
+
+  // Copia o array antes de ordenar/filtrar para não alterar os dados da query.
+  const solves = useMemo(
+    () =>
+      (solveUser?.data ?? []).filter(
+        (solve) => solve.tipoCubo === getTypeCubo(puzzle)
+      ),
+    [solveUser?.data, puzzle]
+  );
+
+  const media =
+    solves.length > 0
+      ? segundos(
+          solves.reduce((total, solve) => total + solve.tempo, 0) /
+            solves.length
+        )
+      : null;
+
+  const handleModal = () => {
+    if (isConvidado) {
+      Alert.alert(
+        "Login",
+        "Faça login para editar seu perfil.",
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Login",
+            onPress: () => router.push("/auth/login"),
+          },
+        ]
+      );
       return;
     }
-    if (!senha) {
-      setErro("Digite sua senha.");
-      return;
-    }
 
-    setErro(null);
-    login.mutate(
-      { email: email.trim(), senha },
-      {
-        onSuccess: () => router.replace("/(tabs)"),
-        onError: (e) => setErro(mensagemDeErro(e)),
-      }
-    );
+    setIsOpen((prev) => !prev);
   };
 
+  const handleSeguir = () => {
+    if (!usuarioLogado?.id || !idUsuario) {
+      Alert.alert("Login", "Entre na sua conta para seguir usuários.");
+      return;
+    }
+
+    const props: FollowRequest = {
+      idSeguidor: usuarioLogado.id,
+      idSeguindo: idUsuario,
+    };
+
+    seguir(props);
+  };
+
+  const submitConversa = () => {
+    if (!usuario?.id || !usuarioLogado?.id) {
+      Alert.alert("Login", "Entre na sua conta para iniciar uma conversa.");
+      return;
+    }
+
+    if (isConvidado) {
+      Alert.alert("Login", "Faça login para iniciar uma conversa.", [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Login",
+          onPress: () => router.push("/auth/login"),
+        },
+      ]);
+      return;
+    }
+
+    const props: ConversaRequestProps = {
+      nome: `${usuario.nome} e ${usuarioLogado.nome}`,
+      idsUsuarios: [usuario.id, usuarioLogado.id],
+      isGrupo: false,
+    };
+
+    conversa(props, {
+      onSuccess: (data) => {
+        router.push(`/chat/${data.idConversa}` as never);
+      },
+      onError: () => {
+        Alert.alert("Erro", "Não foi possível iniciar a conversa.");
+      },
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
+        <Text style={styles.secondaryText}>Carregando usuário...</Text>
+      </View>
+    );
+  }
+
+  if (isError || !usuario) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>
+          Erro ao buscar usuário: {String(error ?? "Usuário não encontrado")}
+        </Text>
+        <Pressable onPress={() => router.back()} style={styles.secondaryButton}>
+          <Text style={styles.buttonText}>Voltar</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+    <View style={styles.container}>
+      {isOpen && (
+        <ModalPerfilNative
+          visible={isOpen}
+          usuarioLogado={usuarioLogado}
+          onClose={() => setIsOpen(false)}
+        />
+      )}
+
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.header}>
-            <Text style={styles.titulo}>{APP_NAME}</Text>
-            <Text style={styles.subtitulo}>Entre para continuar</Text>
-          </View>
-
-          <View style={styles.card}>
-            <Text style={styles.label}>E-mail</Text>
-            <View style={[styles.campo, focado === "email" && styles.campoFocado]}>
-              <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="voce@email.com"
-                placeholderTextColor={colors.textMuted}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="email"
-                textContentType="emailAddress"
-                returnKeyType="next"
-                onFocus={() => setFocado("email")}
-                onBlur={() => setFocado(null)}
-                onSubmitEditing={() => senhaRef.current?.focus()}
-              />
-            </View>
-
-            <Text style={[styles.label, styles.labelSenha]}>Senha</Text>
-            <View style={[styles.campo, focado === "senha" && styles.campoFocado]}>
-              <TextInput
-                ref={senhaRef}
-                style={styles.input}
-                value={senha}
-                onChangeText={setSenha}
-                placeholder="Sua senha"
-                placeholderTextColor={colors.textMuted}
-                secureTextEntry={!mostrarSenha}
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="password"
-                textContentType="password"
-                returnKeyType="done"
-                onFocus={() => setFocado("senha")}
-                onBlur={() => setFocado(null)}
-                onSubmitEditing={entrar}
-              />
-              <Pressable
-                onPress={() => setMostrarSenha((v) => !v)}
-                hitSlop={10}
-                accessibilityRole="button"
-                accessibilityLabel={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
-              >
-                <Ionicons
-                  name={mostrarSenha ? "eye-off-outline" : "eye-outline"}
-                  size={20}
-                  color={colors.textSecondary}
+        {/* Cabeçalho e ações do perfil */}
+        <View style={styles.header}>
+          <View style={styles.profile}>
+            {image ? (
+              <Pressable onPress={() => router.push("/perfil/foto" as never)}>
+                <Image
+                  source={{ uri: image }}
+                  style={styles.avatar}
                 />
               </Pressable>
-            </View>
+            ) : (
+              <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                <Text style={styles.avatarLetter}>
+                  {(nome || usuario.username || "?").charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            )}
 
-            <Pressable onPress={() => irPara("/recuperar-senha")} style={styles.esqueci}>
-              <Text style={styles.link}>Esqueci minha senha</Text>
-            </Pressable>
-
-            {erro ? <Text style={styles.erro}>{erro}</Text> : null}
-
-            <Pressable
-              onPress={entrar}
-              disabled={login.isPending}
-              accessibilityRole="button"
-              style={({ pressed }) => [
-                styles.botao,
-                pressed && styles.botaoPressionado,
-                login.isPending && styles.botaoDesabilitado,
-              ]}
-            >
-              {login.isPending ? (
-                <ActivityIndicator color={colors.accentText} />
-              ) : (
-                <Text style={styles.botaoTexto}>Entrar</Text>
+            <View style={styles.nameContainer}>
+              <Text style={styles.name} numberOfLines={2}>
+                {nome || usuario.username}
+              </Text>
+              {!!usuario.username && (
+                <Text style={styles.username}>@{usuario.username}</Text>
               )}
-            </Pressable>
+            </View>
           </View>
 
-          <View style={styles.rodape}>
-            <Text style={styles.rodapeTexto}>Não tem conta?</Text>
-            <Pressable onPress={() => irPara("/register")} hitSlop={8}>
-              <Text style={styles.link}>Criar conta</Text>
+          {!isUsuarioLogado && (
+            <Pressable
+              style={styles.secondaryButton}
+              onPress={submitConversa}
+            >
+              <Text style={styles.buttonText}>Mensagem</Text>
             </Pressable>
+          )}
+
+          <Pressable
+            disabled={!isUsuarioLogado && carregandoSeguir}
+            onPress={isUsuarioLogado ? handleModal : handleSeguir}
+            style={[
+              styles.primaryButton,
+              !isUsuarioLogado && carregandoSeguir && styles.disabledButton,
+            ]}
+          >
+            <Text style={styles.buttonText}>
+              {isUsuarioLogado
+                ? "Editar perfil"
+                : carregandoSeguir
+                  ? "Aguarde..."
+                  : followInfo}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Estatísticas */}
+        <View style={styles.stats}>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Média {puzzle}</Text>
+            <Text style={styles.statValue}>
+              {media !== null ? `${media}s` : "--"}
+            </Text>
+            <Text style={styles.statCaption}>
+              {solves.length} resoluções
+            </Text>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+
+          <Pressable
+            style={styles.statCard}
+            onPress={() =>
+              router.push(`/followers/${idUsuario}` as never)
+            }
+          >
+            <Text style={styles.statLabel}>Seguidores</Text>
+            <Text style={styles.statValue}>
+              {seguidores?.length ?? 0}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.statCard}
+            onPress={() =>
+              router.push(`/following/${idUsuario}` as never)
+            }
+          >
+            <Text style={styles.statLabel}>Seguindo</Text>
+            <Text style={styles.statValue}>
+              {seguindo?.length ?? 0}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Gráfico de resoluções */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Desempenho</Text>
+
+          <Text style={styles.fieldLabel}>Tipo de cubo</Text>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.puzzleOptions}
+          >
+            {puzzles.map((item : any) => (
+              <Pressable
+                key={item}
+                onPress={() => setPuzzle(item)}
+                style={[
+                  styles.puzzleChip,
+                  puzzle === item && styles.puzzleChipSelected,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.puzzleChipText,
+                    puzzle === item && styles.puzzleChipTextSelected,
+                  ]}
+                >
+                  {item}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+
+          {solves.length > 0 ? (
+            <SolveChartNative solves={solves} />
+          ) : (
+            <Text style={styles.emptyText}>
+              Sem resoluções para este tipo de cubo.
+            </Text>
+          )}
+        </View>
+
+        {/* Publicações */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Publicações</Text>
+
+          {postagens?.length ? (
+            postagens.map((postagem : PostagemProps) => (
+              <View
+                key={postagem.id}
+                onLayout={(event) => {
+                  postPositions.current[String(postagem.id)] =
+                    event.nativeEvent.layout.y;
+                }}
+              >
+                <PostCardNative postagem={postagem} />
+              </View>
+            ))
+          ) : (
+            <Text style={styles.emptyText}>
+              Ainda não há publicações para mostrar.
+            </Text>
+          )}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
-const makeStyles = (c: ThemePalette) =>
-  StyleSheet.create({
-    flex: { flex: 1 },
-    safe: {
-      flex: 1,
-      backgroundColor: c.bgPrimary,
-    },
-    content: {
-      flexGrow: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 24,
-      gap: 24,
-    },
-    header: {
-      width: "100%",
-      maxWidth: 420,
-      gap: 4,
-    },
-    titulo: {
-      color: c.textPrimary,
-      fontSize: 32,
-      fontWeight: "800",
-    },
-    subtitulo: {
-      color: c.textSecondary,
-      fontSize: 16,
-    },
-    card: {
-      width: "100%",
-      maxWidth: 420,
-      padding: 20,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: c.borderColor,
-      backgroundColor: c.cardBg,
-      shadowColor: "#000",
-      shadowOpacity: c.shadowOpacity,
-      shadowRadius: 16,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 3,
-    },
-    label: {
-      color: c.textPrimary,
-      fontSize: 14,
-      fontWeight: "600",
-      marginBottom: 6,
-    },
-    labelSenha: {
-      marginTop: 16,
-    },
-    campo: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-      height: 50,
-      paddingHorizontal: 14,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: c.borderColor,
-      backgroundColor: c.inputBg,
-    },
-    campoFocado: {
-      borderColor: c.accent,
-    },
-    input: {
-      flex: 1,
-      color: c.textPrimary,
-      fontSize: 16,
-    },
-    esqueci: {
-      alignSelf: "flex-end",
-      marginTop: 12,
-    },
-    link: {
-      color: c.accent,
-      fontSize: 14,
-      fontWeight: "600",
-    },
-    erro: {
-      color: c.error,
-      fontSize: 14,
-      marginTop: 12,
-    },
-    botao: {
-      height: 50,
-      marginTop: 20,
-      borderRadius: 12,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: c.accent,
-    },
-    botaoPressionado: {
-      backgroundColor: c.accentHover,
-    },
-    botaoDesabilitado: {
-      backgroundColor: c.accentDisabled,
-    },
-    botaoTexto: {
-      color: c.accentText,
-      fontSize: 16,
-      fontWeight: "700",
-    },
-    rodape: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-    },
-    rodapeTexto: {
-      color: c.textSecondary,
-      fontSize: 14,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F6F7FB",
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 40,
+    gap: 16,
+  },
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+    gap: 12,
+  },
+  header: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    padding: 16,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  profile: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  avatar: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: "#E5E7EB",
+  },
+  avatarPlaceholder: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarLetter: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: "#374151",
+  },
+  nameContainer: {
+    flex: 1,
+    gap: 4,
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  username: {
+    fontSize: 14,
+    color: "#6B7280",
+  },
+  primaryButton: {
+    backgroundColor: "#2563EB",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  secondaryButton: {
+    backgroundColor: "#E8EEFF",
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  disabledButton: {
+    opacity: 0.6,
+  },
+  buttonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1D4ED8",
+  },
+  stats: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  statCard: {
+    flex: 1,
+    minWidth: 0,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    padding: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    gap: 5,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#6B7280",
+    textAlign: "center",
+  },
+  statValue: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  statCaption: {
+    fontSize: 11,
+    color: "#6B7280",
+  },
+  section: {
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    gap: 12,
+  },
+  sectionTitle: {
+    fontSize: 19,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  fieldLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#4B5563",
+  },
+  puzzleOptions: {
+    gap: 8,
+    paddingVertical: 2,
+  },
+  puzzleChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 20,
+    backgroundColor: "#F3F4F6",
+  },
+  puzzleChipSelected: {
+    backgroundColor: "#2563EB",
+  },
+  puzzleChipText: {
+    fontSize: 13,
+    color: "#374151",
+    fontWeight: "500",
+  },
+  puzzleChipTextSelected: {
+    color: "#FFFFFF",
+  },
+  emptyText: {
+    color: "#6B7280",
+    fontSize: 14,
+    lineHeight: 21,
+  },
+  secondaryText: {
+    color: "#6B7280",
+    fontSize: 14,
+  },
+  errorText: {
+    color: "#DC2626",
+    textAlign: "center",
+  },
+});
