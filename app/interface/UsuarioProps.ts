@@ -31,6 +31,7 @@ export interface UsuarioProps {
   tipo : string;
   isGuest : boolean;
   picture?: string;
+  username: string;
 }
 
 // Keep only named exports for types
