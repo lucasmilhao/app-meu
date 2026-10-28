@@ -45,13 +45,15 @@ export function PostCard({
   const { mutate: denunciar } = useDenunciaCreate();
   const curtida = useCurtidaCreate();
   const { data: isCurtido } = useIsCurtido(postagem.id);
-  const { data: svg } = useScrambleSvg(postagem?.scramble?.scramble ?? "");
 
-  const svgFinal = (svg ?? "")
+  const svgFinal = (postagem?.scramble?.svg ?? "")
     .replace(/\\u003C/g, "<")
     .replace(/\\u003E/g, ">")
     .replace(/\\"/g, '"')
     .replace(/\\n/g, "");
+
+  console.log(svgFinal);
+
 
   const [aspectRatio, setAspectRatio] = useState(16 / 9);
 
@@ -181,10 +183,25 @@ export function PostCard({
         {/* {postagem.scramble} */}
         {postagem.scramble ? (
           <View style={styles.scramble}>
+            {svgFinal && (
+              <View style={styles.scrambleSvg}>
+                <SvgXml
+                  xml={svgFinal}
+                  width="100%"
+                  height="180"
+                />
+              </View>
+            )}
 
-            {svg && <SvgXml xml={svgFinal} />}
-            <InfoLinha label="Scramble" value={postagem.scramble.scramble} />
-            <InfoLinha label="Solução" value={postagem.scramble.solution} />
+            <InfoLinha
+              label="Scramble"
+              value={postagem.scramble.scramble}
+            />
+
+            <InfoLinha
+              label="Solução"
+              value={postagem.scramble.solution}
+            />
           </View>
         ) : null}
 
@@ -313,15 +330,21 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 8,
     borderRadius: 12,
-  },
-  scramble: {
+  }, scramble: {
     marginTop: 4,
-    gap: 6,
+    gap: 10,
     padding: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: 16,
     backgroundColor: COLORS.surface,
+  },
+
+  scrambleSvg: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
   },
   infoLinha: {
     gap: 2,
