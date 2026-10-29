@@ -1,4 +1,5 @@
 import useScramble from "@/hooks/scramble/useScramble";
+import { useUsuarioLogado } from "@/hooks/usuario/useUsuarioLogado";
 import { StyleSheet, Text, View } from "react-native";
 import { SvgXml } from "react-native-svg";
 
@@ -22,7 +23,10 @@ export default function Practice() {
         .replace(/\\"/g, '"')
         .replace(/\\n/g, "");
 
-    console.log(scramble?.scramble);
+    const {data : usuario} = useUsuarioLogado();
+
+
+    console.log(usuario?.nome);
     
 
     return (

@@ -1,14 +1,10 @@
-import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { API_URL } from "@/app/service/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { api, salvarTokenAutenticacao } from "@/app/service/api";
 
 const fetchdata = async (request : string | undefined) => {
-    const response = await axios.post(`${API_URL}/auth/login/google`, request);
+    const response = await api.post("/auth/login/google", request);
 
-    const token = response.data.token;
-
-    AsyncStorage.setItem("authToken", token)
+    await salvarTokenAutenticacao(response.data.token);
 
     return response.data;
 }
@@ -18,13 +14,11 @@ export function useUsuarioLoginGoogle() {
 
     return useMutation({
         mutationFn: fetchdata,
-        onSuccess: () => {
-            console.log("VAMO BRASISSSSISLSLSIDL");
-            
-            queryClient.invalidateQueries({queryKey : ["usuario-data"]});
-        },
-        onError: () => {
-            console.log("FERROU RAPAZES");
+        onSuccess: async () => {
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ["usuario-data"] }),
+                queryClient.invalidateQueries({ queryKey: ["usuario-logado-data"] }),
+            ]);
         }
     });
 }

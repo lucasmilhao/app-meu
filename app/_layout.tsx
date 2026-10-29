@@ -1,6 +1,7 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useState } from 'react';
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -11,7 +12,7 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const client = new QueryClient();
+  const [client] = useState(() => new QueryClient());
 
   return (
     <QueryClientProvider client={client}>
