@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Image } from "expo-image";
-import { useEffect, useState } from "react";
-import { Alert, Platform, Pressable, Share, StyleSheet, Text, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, Platform, Pressable, Share, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import type PostagemProps from "@/app/interface/PostagemProps";
 import { useUsuarioLogado } from "@/hooks/usuario/useUsuarioLogado";
@@ -11,6 +11,8 @@ import { CurtidaRequest, useCurtidaCreate } from "@/hooks/curtida/useCurtidaCrea
 import { useIsCurtido } from "@/hooks/curtida/useIsCurtido";
 import useScrambleSvg from "@/hooks/scramble/useScrambleSvg";
 import { SvgXml } from "react-native-svg";
+import { Palette, ThemePalette } from "@/constants/pallete";
+import { router } from "expo-router";
 
 // Troque pelo endereço do seu front web: é o link que vai no "Compartilhar".
 const WEB_URL = "https://cubing2gether-2aen.onrender.com";
@@ -21,7 +23,6 @@ const COLORS = {
   muted: "#71767b",
   border: "#2f3336",
   surface: "#16181c",
-  accent: "#1d9bf0",
 };
 
 type PostCardProps = {
@@ -46,13 +47,15 @@ export function PostCard({
   const curtida = useCurtidaCreate();
   const { data: isCurtido } = useIsCurtido(postagem.id);
 
+
+  const colors = Palette[useColorScheme() === "dark" ? "dark" : "light"];
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   const svgFinal = (postagem?.scramble?.svg ?? "")
     .replace(/\\u003C/g, "<")
     .replace(/\\u003E/g, ">")
     .replace(/\\"/g, '"')
     .replace(/\\n/g, "");
-
-  console.log(svgFinal);
 
 
   const [aspectRatio, setAspectRatio] = useState(16 / 9);
@@ -120,12 +123,18 @@ export function PostCard({
           <Text
             key={`${parte}-${index}`}
             style={styles.mention}
-            onPress={() => onPressUsuario?.(parte.slice(1))}
+            onPress={() => router.push({
+                pathname: "/(screens)/user-profile",
+                params: {
+                  username: parte.slice(1),
+                },
+              })}
           >
             {parte}
           </Text>
         );
       }
+      
 
       return parte;
     });
@@ -194,11 +203,13 @@ export function PostCard({
             )}
 
             <InfoLinha
+              styles={styles}
               label="Scramble"
               value={postagem.scramble.scramble}
             />
 
             <InfoLinha
+              styles={styles}
               label="Solução"
               value={postagem.scramble.solution}
             />
@@ -224,9 +235,9 @@ export function PostCard({
             <Ionicons
               name={isCurtido ? "heart" : "heart-outline"}
               size={18}
-              color={isCurtido ? COLORS.accent : COLORS.muted}
+              color={isCurtido ? colors.accent : COLORS.muted}
             />
-            <Text style={[styles.actionText, isCurtido && { color: COLORS.accent }]}>
+            <Text style={[styles.actionText, isCurtido && { color: colors.accent }]}>
               {postagem.curtidas}
             </Text>
           </Pressable>
@@ -240,7 +251,7 @@ export function PostCard({
   );
 }
 
-function InfoLinha({ label, value }: { label: string; value: string }) {
+function InfoLinha({ styles, label, value }: { styles: any, label: string; value: string }) {
   return (
     <View style={styles.infoLinha}>
       <Text style={styles.infoLabel}>{label}</Text>
@@ -263,116 +274,80 @@ export function formatarTempoRelativo(dataISO: string) {
   return data.toLocaleDateString("pt-BR");
 }
 
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: "row",
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: COLORS.border,
-  },
-  cardDestacado: {
-    backgroundColor: COLORS.surface,
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-  },
-  avatarPlaceholder: {
-    backgroundColor: COLORS.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarLetra: {
-    color: COLORS.text,
-    fontWeight: "600",
-  },
-  main: {
-    flex: 1,
-    minWidth: 0,
-    gap: 4,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  userProps: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "baseline",
-    gap: 4,
-  },
-  nome: {
-    flexShrink: 1,
-    color: COLORS.text,
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  muted: {
-    flexShrink: 1,
-    color: COLORS.muted,
-    fontSize: 14,
-  },
-  descricao: {
-    color: COLORS.text,
-    fontSize: 15,
-    lineHeight: 21,
-  },
-  mention: {
-    color: COLORS.accent,
-    fontWeight: "600",
-  },
-  imagem: {
-    width: "100%",
-    marginTop: 8,
-    borderRadius: 12,
-  }, scramble: {
-    marginTop: 4,
-    gap: 10,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 16,
-    backgroundColor: COLORS.surface,
-  },
-
-  scrambleSvg: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-  },
-  infoLinha: {
-    gap: 2,
-  },
-  infoLabel: {
-    color: COLORS.text,
-    fontSize: 11,
-    textTransform: "uppercase",
-    letterSpacing: 0.4,
-  },
-  infoValue: {
-    color: COLORS.muted,
-    fontSize: 13,
-    fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
-  },
-  actions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 28,
-    marginTop: 6,
-  },
-  action: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  actionText: {
-    color: COLORS.muted,
-    fontSize: 13,
-  },
-});
+const makeStyles = (c: ThemePalette) =>
+  StyleSheet.create({
+    card: {
+      flexDirection: "row",
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: c.borderColor,
+    },
+    cardDestacado: { backgroundColor: c.cardBg },
+    avatar: { width: 44, height: 44, borderRadius: 22 },
+    avatarPlaceholder: {
+      backgroundColor: c.borderColor,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    avatarLetra: { color: c.textPrimary, fontWeight: "600" },
+    main: { flex: 1, minWidth: 0, gap: 4 },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 8,
+    },
+    userProps: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "baseline",
+      gap: 4,
+    },
+    nome: {
+      flexShrink: 1,
+      color: c.textPrimary,
+      fontSize: 14,
+      fontWeight: "700",
+    },
+    muted: { flexShrink: 1, color: c.textSecondary, fontSize: 14 },
+    descricao: { color: c.textPrimary, fontSize: 15, lineHeight: 21 },
+    mention: { color: c.accent, fontWeight: "600" },
+    imagem: { width: "100%", marginTop: 8, borderRadius: 12 },
+    scramble: {
+      marginTop: 4,
+      gap: 10,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: c.borderColor,
+      borderRadius: 16,
+      backgroundColor: c.cardBg,
+    },
+    scrambleSvg: {
+      width: "100%",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 8,
+    },
+    infoLinha: { gap: 2 },
+    infoLabel: {
+      color: c.textPrimary,
+      fontSize: 11,
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+    },
+    infoValue: {
+      color: c.textSecondary,
+      fontSize: 13,
+      fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
+    },
+    actions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 28,
+      marginTop: 6,
+    },
+    action: { flexDirection: "row", alignItems: "center", gap: 6 },
+    actionText: { color: c.textSecondary, fontSize: 13 },
+  });

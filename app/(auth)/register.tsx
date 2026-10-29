@@ -189,8 +189,8 @@ export default function Register() {
 
           <View style={styles.rodape}>
             <Text style={styles.rodapeTexto}>Não tem conta?</Text>
-            <Pressable onPress={() => irPara("/register")} hitSlop={8}>
-              <Text style={styles.link}>Criar conta</Text>
+            <Pressable onPress={() => irPara("/login")} hitSlop={8}>
+              <Text style={styles.link}>Fazer login</Text>
             </Pressable>
           </View>
         </ScrollView>

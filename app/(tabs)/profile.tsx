@@ -8,11 +8,12 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useColorScheme,
   View,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { puzzles, segundos } from "../Practice";
+import { puzzles, segundos } from "../(tabs)/practice";
 import { useSolveDataUser } from "../../hooks/solves/useSolveDataUser";
 import { useUsuarioLogado } from "../../hooks/usuario/useUsuarioLogado";
 import { useFollowSeguindoData } from "../../hooks/follow/useFollowSeguindoData";
@@ -22,16 +23,17 @@ import {
   type FollowRequest,
 } from "../../hooks/follow/useFollowCreate";
 import { useFollowStatus } from "../../hooks/follow/useFollowStatus";
-import { usePostagemUsuario } from "../../hooks/postagem/usePostagemUsuario";
+
 import { useConversaCreate } from "../../hooks/chat/conversa/useConversaCreate";
-import { useUsuarioUsername } from "../../hooks/usuario/useUsuarioUsername";
-import type { ConversaRequestProps } from "../../interface/ConversaRequestProps";
 
 // Substitua pelos componentes compatíveis com React Native do seu projeto.
-import { ModalPerfilNative } from "../../components/modal/ModalPerfilNative";
-import { SolveChartNative } from "../../components/chart/SolveChartNative";
-import { PostCardNative } from "../../components/postagem/PostCardNative";
 import PostagemProps from "../interface/PostagemProps";
+import { usePostagemUsuario } from "@/hooks/postagem/usePostagemUsuario";
+import { useUsuarioUsername } from "@/hooks/usuario/useUsuarioUsername";
+import { PostCard } from "@/components/PostCard";
+import { Palette, ThemePalette } from "@/constants/pallete";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { SolveChart } from "@/components/SolveChat";
 
 const puzzleNames: Record<string, string> = {
   "3x3x3": "THREE",
@@ -61,17 +63,21 @@ export default function Usuario() {
   const scrollRef = useRef<ScrollView>(null);
   const postPositions = useRef<Record<string, number>>({});
 
+  const { data: usuarioLogado, isError: erroUsuario } =
+    useUsuarioLogado();
+
   const {
     data: usuario,
     isLoading,
     isError,
     error,
-  } = useUsuarioUsername(username ?? "");
+  } = useUsuarioUsername(username ?? usuarioLogado?.username);
 
   const idUsuario = usuario?.id;
 
-  const { data: usuarioLogado, isError: erroUsuario } =
-    useUsuarioLogado();
+
+  const colors = Palette[useColorScheme() === "dark" ? "dark" : "light"];
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const { data: seguindo } = useFollowSeguindoData(idUsuario);
   const { data: seguidores } = useFollowSeguidoresData(idUsuario);
@@ -96,7 +102,7 @@ export default function Usuario() {
 
   useEffect(() => {
     if (erroUsuario) {
-      router.replace("/auth/login");
+      router.replace("/(auth)/login");
     }
   }, [erroUsuario, router]);
 
@@ -138,9 +144,9 @@ export default function Usuario() {
   const media =
     solves.length > 0
       ? segundos(
-          solves.reduce((total, solve) => total + solve.tempo, 0) /
-            solves.length
-        )
+        solves.reduce((total, solve) => total + solve.tempo, 0) /
+        solves.length
+      )
       : null;
 
   const handleModal = () => {
@@ -152,7 +158,7 @@ export default function Usuario() {
           { text: "Cancelar", style: "cancel" },
           {
             text: "Login",
-            onPress: () => router.push("/auth/login"),
+            onPress: () => router.push("/(auth)/login"),
           },
         ]
       );
@@ -187,26 +193,26 @@ export default function Usuario() {
         { text: "Cancelar", style: "cancel" },
         {
           text: "Login",
-          onPress: () => router.push("/auth/login"),
+          onPress: () => router.push("/(auth)/login"),
         },
       ]);
       return;
     }
 
-    const props: ConversaRequestProps = {
-      nome: `${usuario.nome} e ${usuarioLogado.nome}`,
-      idsUsuarios: [usuario.id, usuarioLogado.id],
-      isGrupo: false,
-    };
+    // const props: ConversaRequestProps = {
+    //   nome: `${usuario.nome} e ${usuarioLogado.nome}`,
+    //   idsUsuarios: [usuario.id, usuarioLogado.id],
+    //   isGrupo: false,
+    // };
 
-    conversa(props, {
-      onSuccess: (data) => {
-        router.push(`/chat/${data.idConversa}` as never);
-      },
-      onError: () => {
-        Alert.alert("Erro", "Não foi possível iniciar a conversa.");
-      },
-    });
+    //   conversa(props, {
+    //     onSuccess: (data) => {
+    //       router.push(`/chat/${data.idConversa}` as never);
+    //     },
+    //     onError: () => {
+    //       Alert.alert("Erro", "Não foi possível iniciar a conversa.");
+    //     },
+    //   });
   };
 
   if (isLoading) {
@@ -225,21 +231,30 @@ export default function Usuario() {
           Erro ao buscar usuário: {String(error ?? "Usuário não encontrado")}
         </Text>
         <Pressable onPress={() => router.back()} style={styles.secondaryButton}>
-          <Text style={styles.buttonText}>Voltar</Text>
+          <Text style={styles.buttonTextPrimary}>Voltar</Text>
         </Pressable>
       </View>
     );
   }
 
+  console.log();
+
+  console.log(usuario.nome);
+  console.log("Username recebido:", username);
+  console.log("Usuário retornado:", usuario);
+  console.log("Carregando:", isLoading);
+  console.log("Erro:", isError, error);
+
+
   return (
-    <View style={styles.container}>
-      {isOpen && (
+    <SafeAreaView style={styles.container}>
+      {/* {isOpen && (
         <ModalPerfilNative
           visible={isOpen}
           usuarioLogado={usuarioLogado}
           onClose={() => setIsOpen(false)}
         />
-      )}
+      )} */}
 
       <ScrollView
         ref={scrollRef}
@@ -279,7 +294,7 @@ export default function Usuario() {
               style={styles.secondaryButton}
               onPress={submitConversa}
             >
-              <Text style={styles.buttonText}>Mensagem</Text>
+              <Text style={styles.buttonTextPrimary}>Mensagem</Text>
             </Pressable>
           )}
 
@@ -291,7 +306,7 @@ export default function Usuario() {
               !isUsuarioLogado && carregandoSeguir && styles.disabledButton,
             ]}
           >
-            <Text style={styles.buttonText}>
+            <Text style={styles.buttonTextPrimary}>
               {isUsuarioLogado
                 ? "Editar perfil"
                 : carregandoSeguir
@@ -349,7 +364,7 @@ export default function Usuario() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.puzzleOptions}
           >
-            {puzzles.map((item : any) => (
+            {puzzles.map((item: any) => (
               <Pressable
                 key={item}
                 onPress={() => setPuzzle(item)}
@@ -371,7 +386,7 @@ export default function Usuario() {
           </ScrollView>
 
           {solves.length > 0 ? (
-            <SolveChartNative solves={solves} />
+            <SolveChart solves={solves} />
           ) : (
             <Text style={styles.emptyText}>
               Sem resoluções para este tipo de cubo.
@@ -384,7 +399,7 @@ export default function Usuario() {
           <Text style={styles.sectionTitle}>Publicações</Text>
 
           {postagens?.length ? (
-            postagens.map((postagem : PostagemProps) => (
+            postagens.map((postagem: PostagemProps) => (
               <View
                 key={postagem.id}
                 onLayout={(event) => {
@@ -392,7 +407,7 @@ export default function Usuario() {
                     event.nativeEvent.layout.y;
                 }}
               >
-                <PostCardNative postagem={postagem} />
+                <PostCard postagem={postagem} />
               </View>
             ))
           ) : (
@@ -402,170 +417,98 @@ export default function Usuario() {
           )}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F6F7FB",
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
-    gap: 16,
-  },
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-    gap: 12,
-  },
-  header: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    padding: 16,
-    gap: 12,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  profile: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  avatar: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: "#E5E7EB",
-  },
-  avatarPlaceholder: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarLetter: {
-    fontSize: 26,
-    fontWeight: "700",
-    color: "#374151",
-  },
-  nameContainer: {
-    flex: 1,
-    gap: 4,
-  },
-  name: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  username: {
-    fontSize: 14,
-    color: "#6B7280",
-  },
-  primaryButton: {
-    backgroundColor: "#2563EB",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  secondaryButton: {
-    backgroundColor: "#E8EEFF",
-    paddingVertical: 11,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1D4ED8",
-  },
-  stats: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  statCard: {
-    flex: 1,
-    minWidth: 0,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
-    padding: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    gap: 5,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#6B7280",
-    textAlign: "center",
-  },
-  statValue: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  statCaption: {
-    fontSize: 11,
-    color: "#6B7280",
-  },
-  section: {
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    gap: 12,
-  },
-  sectionTitle: {
-    fontSize: 19,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  fieldLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#4B5563",
-  },
-  puzzleOptions: {
-    gap: 8,
-    paddingVertical: 2,
-  },
-  puzzleChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 20,
-    backgroundColor: "#F3F4F6",
-  },
-  puzzleChipSelected: {
-    backgroundColor: "#2563EB",
-  },
-  puzzleChipText: {
-    fontSize: 13,
-    color: "#374151",
-    fontWeight: "500",
-  },
-  puzzleChipTextSelected: {
-    color: "#FFFFFF",
-  },
-  emptyText: {
-    color: "#6B7280",
-    fontSize: 14,
-    lineHeight: 21,
-  },
-  secondaryText: {
-    color: "#6B7280",
-    fontSize: 14,
-  },
-  errorText: {
-    color: "#DC2626",
-    textAlign: "center",
-  },
-});
+const makeStyles = (c: ThemePalette) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.bgPrimary },
+    scrollContent: { padding: 16, paddingBottom: 40, gap: 16 },
+    center: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 24,
+      gap: 12,
+      backgroundColor: c.bgPrimary,
+    },
+    header: {
+      backgroundColor: c.cardBg,
+      borderRadius: 18,
+      padding: 16,
+      gap: 12,
+      borderWidth: 1,
+      borderColor: c.borderColor,
+    },
+    profile: { flexDirection: "row", alignItems: "center", gap: 12 },
+    avatar: {
+      width: 68,
+      height: 68,
+      borderRadius: 34,
+      backgroundColor: c.borderColor,
+    },
+    avatarPlaceholder: { alignItems: "center", justifyContent: "center" },
+    avatarLetter: { fontSize: 26, fontWeight: "700", color: c.textPrimary },
+    nameContainer: { flex: 1, gap: 4 },
+    name: { fontSize: 20, fontWeight: "700", color: c.textPrimary },
+    username: { fontSize: 14, color: c.textSecondary },
+    primaryButton: {
+      backgroundColor: c.accent,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 10,
+      alignItems: "center",
+    },
+    secondaryButton: {
+      backgroundColor: c.inputBg,
+      borderWidth: 1,
+      borderColor: c.borderColor,
+      paddingVertical: 11,
+      paddingHorizontal: 14,
+      borderRadius: 10,
+      alignItems: "center",
+    },
+    disabledButton: { opacity: 0.6 },
+    buttonTextPrimary: { fontSize: 14, fontWeight: "600", color: c.accentText },
+    buttonTextSecondary: { fontSize: 14, fontWeight: "600", color: c.textPrimary },
+    stats: { flexDirection: "row", gap: 8 },
+    statCard: {
+      flex: 1,
+      minWidth: 0,
+      backgroundColor: c.cardBg,
+      borderRadius: 14,
+      padding: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: c.borderColor,
+      gap: 5,
+    },
+    statLabel: { fontSize: 12, color: c.textSecondary, textAlign: "center" },
+    statValue: { fontSize: 22, fontWeight: "700", color: c.textPrimary },
+    statCaption: { fontSize: 11, color: c.textSecondary },
+    section: {
+      backgroundColor: c.cardBg,
+      padding: 16,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: c.borderColor,
+      gap: 12,
+    },
+    sectionTitle: { fontSize: 19, fontWeight: "700", color: c.textPrimary },
+    fieldLabel: { fontSize: 14, fontWeight: "600", color: c.textSecondary },
+    puzzleOptions: { gap: 8, paddingVertical: 2 },
+    puzzleChip: {
+      paddingHorizontal: 14,
+      paddingVertical: 9,
+      borderRadius: 20,
+      backgroundColor: c.inputBg,
+    },
+    puzzleChipSelected: { backgroundColor: c.accent },
+    puzzleChipText: { fontSize: 13, color: c.textSecondary, fontWeight: "500" },
+    puzzleChipTextSelected: { color: c.accentText },
+    emptyText: { color: c.textSecondary, fontSize: 14, lineHeight: 21 },
+    secondaryText: { color: c.textSecondary, fontSize: 14 },
+    errorText: { color: c.error, textAlign: "center" },
+  });
