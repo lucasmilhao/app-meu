@@ -95,6 +95,7 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <Text style={styles.pageTitle}>Conversas</Text>
       </View>
+      {isComentariosOpen && <CommentModal comentarios={postagem?.comentarios} idPostagem={postagem?.id} idUsuario={postagem?.usuario.id} onClose={() => setIsComentariosOpen(false)} visible={isComentariosOpen}/>}
 
       <FlatList
         data={postagens ?? []}
