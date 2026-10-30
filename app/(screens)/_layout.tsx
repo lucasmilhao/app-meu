@@ -8,6 +8,7 @@ export default function TabLayout() {
     return (
         <Stack>
             <Stack.Screen name="user-profile" />
+            <Stack.Screen name="conversa" options={{headerShown: false}} />
         </Stack>
     );
 }

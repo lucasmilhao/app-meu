@@ -5,6 +5,6 @@ export default interface MensagemResponse {
     texto : string,
     sender : UsuarioProps,
     conversa : string,
-    visto : boolean,
+    isVisto : boolean,
     mandado : string
 }

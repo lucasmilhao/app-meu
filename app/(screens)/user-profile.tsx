@@ -33,6 +33,7 @@ import { useUsuarioUsername } from "@/hooks/usuario/useUsuarioUsername";
 import { PostCard } from "@/components/PostCard";
 import { Palette, ThemePalette } from "@/constants/pallete";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ConversaRequestProps from "../interface/ConversaRequestProps";
 
 const puzzleNames: Record<string, string> = {
   "3x3x3": "THREE",
@@ -198,20 +199,25 @@ export default function Usuario() {
       return;
     }
 
-    // const props: ConversaRequestProps = {
-    //   nome: `${usuario.nome} e ${usuarioLogado.nome}`,
-    //   idsUsuarios: [usuario.id, usuarioLogado.id],
-    //   isGrupo: false,
-    // };
+    const props: ConversaRequestProps = {
+      nome: `${usuario.nome} e ${usuarioLogado.nome}`,
+      idsUsuarios: [usuario.id, usuarioLogado.id],
+      isGrupo: false,
+    };
 
-    //   conversa(props, {
-    //     onSuccess: (data) => {
-    //       router.push(`/chat/${data.idConversa}` as never);
-    //     },
-    //     onError: () => {
-    //       Alert.alert("Erro", "Não foi possível iniciar a conversa.");
-    //     },
-    //   });
+      conversa(props, {
+        onSuccess: (data) => {
+          router.push({
+            pathname: "/(screens)/conversa",
+            params: {
+              idConversa: data.idConversa
+            }
+          });
+        },
+        onError: () => {
+          Alert.alert("Erro", "Não foi possível iniciar a conversa.");
+        },
+      });
   };
 
   if (isLoading) {

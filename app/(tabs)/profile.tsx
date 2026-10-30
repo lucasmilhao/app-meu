@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { puzzles, segundos } from "../(tabs)/practice";
+import { puzzles, formatTime } from "../(tabs)/practice";
 import { useSolveDataUser } from "../../hooks/solves/useSolveDataUser";
 import { useUsuarioLogado } from "../../hooks/usuario/useUsuarioLogado";
 import { useFollowSeguindoData } from "../../hooks/follow/useFollowSeguindoData";
@@ -34,6 +34,7 @@ import { PostCard } from "@/components/PostCard";
 import { Palette, ThemePalette } from "@/constants/pallete";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SolveChart } from "@/components/SolveChat";
+import { UsuarioModal } from "@/components/UsuarioModal";
 
 const puzzleNames: Record<string, string> = {
   "3x3x3": "THREE",
@@ -49,7 +50,7 @@ const puzzleNames: Record<string, string> = {
   pyraminx: "PYRA",
 };
 
-function getTypeCubo(cubo: string): string {
+export function getTypeCubo(cubo: string): string {
   return puzzleNames[cubo] ?? "Desconhecido";
 }
 
@@ -143,7 +144,7 @@ export default function Usuario() {
 
   const media =
     solves.length > 0
-      ? segundos(
+      ? formatTime(
         solves.reduce((total, solve) => total + solve.tempo, 0) /
         solves.length
       )
@@ -248,13 +249,15 @@ export default function Usuario() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* {isOpen && (
-        <ModalPerfilNative
+      {isOpen && (
+        <UsuarioModal
           visible={isOpen}
           usuarioLogado={usuarioLogado}
           onClose={() => setIsOpen(false)}
         />
-      )} */}
+      )}
+
+      
 
       <ScrollView
         ref={scrollRef}

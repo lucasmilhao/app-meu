@@ -13,7 +13,8 @@ const fetchdata = async (idConversa : string | undefined) : Promise<ConversaResp
 export function useConversaData(idConversa : string | undefined) {
     return useQuery({
         queryFn: () => fetchdata(idConversa),
-        queryKey: ["Conversa-data"],
+        queryKey: ["conversa", idConversa],
+        enabled: Boolean(idConversa),
         refetchInterval: 2000
     });
 }

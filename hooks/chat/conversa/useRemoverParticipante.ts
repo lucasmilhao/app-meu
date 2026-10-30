@@ -1,0 +1,25 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/app/service/api";
+
+export interface ParticipantesRequest {
+    idUsuario : string | undefined;
+    idConversa : string | undefined;
+}
+
+const fetchdata = async (data : ParticipantesRequest) : Promise<ParticipantesRequest> => {
+    const response = await api.delete(`/participantes`, {data});
+
+    return response.data;
+}
+
+export function useRemoverParticipante() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: fetchdata,
+        onSuccess: (_data, participante) => {
+            queryClient.invalidateQueries({ queryKey: ["conversa", participante.idConversa] });
+            queryClient.invalidateQueries({ queryKey: ["conversas-usuario"] });
+        }
+    })
+}

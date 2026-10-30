@@ -16,7 +16,7 @@ export function useConversaCreate() {
     return useMutation({
         mutationFn: fetchdata,
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ["conversa-data"]});
+            queryClient.invalidateQueries({queryKey: ["conversas-usuario"]});
         }
     })
 }

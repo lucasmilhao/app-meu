@@ -6,16 +6,16 @@ export interface ScrambleProps {
     svg : string
 }
 
-const fetchData = async () : Promise<ScrambleProps> => {
-    const response = await api.get(`/scrambles/333`);
+const fetchData = async (puzzle : string) : Promise<ScrambleProps> => {
+    const response = await api.get(`/scrambles/${puzzle}`);
 
     return response.data;
 }
 
 
-export default function useScramble() {
+export default function useScramble(puzzle: string) {
     return useQuery({
-        queryFn: fetchData,
+        queryFn: () => fetchData(puzzle),
         queryKey: ['scramble-data'],
         retry: 2
     });
