@@ -9,6 +9,7 @@ export default function TabLayout() {
         <Stack>
             <Stack.Screen name="user-profile" />
             <Stack.Screen name="conversa" options={{headerShown: false}} />
+            <Stack.Screen name="video-call" options={{headerShown: false}} />
         </Stack>
     );
 }

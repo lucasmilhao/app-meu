@@ -34,6 +34,9 @@ import { useRemoverParticipante } from "@/hooks/chat/conversa/useRemoverParticip
 import { useConviteCreate } from "@/hooks/chat/conversa/useConviteCreate";
 import { useConversaEdit } from "@/hooks/chat/conversa/useConversaEdit";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { usePartidaCreate } from "@/hooks/partidas/usePartidaCreate";
+import ConversaRequestProps from "../interface/ConversaRequestProps";
+import { useConversaCreate } from "@/hooks/chat/conversa/useConversaCreate";
 
 export default function Conversa() {
     const { idConversa: paramId } = useLocalSearchParams<{
@@ -41,11 +44,13 @@ export default function Conversa() {
     }>();
 
     const idConversa = Array.isArray(paramId) ? paramId[0] : paramId;
+    const partida = usePartidaCreate();
 
     const router = useRouter();
 
     const colors = Palette[useColorScheme() === "dark" ? "dark" : "light"];
     const styles = useMemo(() => makeStyles(colors), [colors]);
+    const conversaCreate = useConversaCreate();
 
 
     const { data: mensagens, isLoading: carregandoMensagens } =
@@ -71,6 +76,7 @@ export default function Conversa() {
     const listaRef = useRef<FlatList>(null);
 
     const qtdParticipantes = conversa?.participantes?.length ?? 0;
+    let idsUsuarios: string[] = [];
 
     const user =
         conversa?.participantes?.at(0)?.id === usuarioLogado?.id
@@ -215,6 +221,42 @@ export default function Conversa() {
             },
         });
     };
+
+
+    const submitPartida = (nome: string, idsUsuarios: string[]) => {
+
+        partida.mutate(idsUsuarios, {
+            onSuccess: (data) => {
+
+                const propsConversa: ConversaRequestProps = {
+                    nome,
+                    idsUsuarios,
+                    isGrupo: false
+                }
+
+                conversaCreate.mutate(propsConversa, {
+                    onSuccess: (dataConversa: ConversaResponseProps) => {
+                        const props: MensagemRequest = {
+                            texto: `Junte-se à mim em: https://cubing2gether-2aen.onrender.com/video/${data.idPartida}`,
+                            idSender: usuarioLogado?.id,
+                            idConversa: dataConversa.idConversa
+                        }
+
+                        enviaMensagem.mutate(props, {
+                            onSuccess: () => console.log("Mensagem enviada")
+
+                        })
+                        router.push({
+                            pathname: "/(screens)/video-call",
+                            params: { roomId: data.idPartida },
+                        })
+                    }
+                });
+
+            }
+        });
+    }
+
 
     const abrirPerfil = (username?: string) => {
         if (!username) return;
@@ -528,16 +570,21 @@ export default function Conversa() {
                                     Detalhes
                                 </Text>
                             </TouchableOpacity>
-                            
-                            <TouchableOpacity
+
+                            {qtdParticipantes === 2 && <TouchableOpacity
                                 style={styles.menuItem}
                                 onPress={() => {
-                                    setMenuAberto(false);
-                                    setDetalhesAbertos(true);
+                                    const outro = dataParticipantes?.find(
+                                        (participante) =>
+                                            participante.usuario.id !== usuarioLogado?.id
+                                    )?.usuario;
+                                    idsUsuarios.push(outro?.id ?? "");
+                                    idsUsuarios.push(usuarioLogado?.id ?? "");
+                                    submitPartida(`${outro?.nome} e ${usuarioLogado?.nome}`, idsUsuarios);
                                 }}
                             >
                                 <Ionicons
-                                    name="people-outline"
+                                    name="call-outline"
                                     size={20}
                                     color={colors.textPrimary}
                                 />
@@ -547,9 +594,9 @@ export default function Conversa() {
                                         { color: colors.textPrimary },
                                     ]}
                                 >
-                                    Detalhes
+                                    Iniciar chamada
                                 </Text>
-                            </TouchableOpacity>
+                            </TouchableOpacity>}
 
                             {isAdmin && conversa?.isGrupo && (
                                 <TouchableOpacity

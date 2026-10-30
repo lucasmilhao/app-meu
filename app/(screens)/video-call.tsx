@@ -26,7 +26,7 @@ import { useSolveMutate } from "../../hooks/solves/useSolveMutate";
 import { usePartidaUsuarioEdit } from "../../hooks/partidas/usePartidaUsuarioEdit";
 import { socket } from "@/components/socket";
 import { SolveRequest } from "../interface/SolveRequest";
-import { Palette } from "@/constants/pallete";
+import { Palette, ThemePalette } from "@/constants/pallete";
 import useScramble from "@/hooks/scramble/useScramble";
 
 type DescriptionPayload = { offer?: any; answer?: any };
@@ -364,6 +364,7 @@ export default function VideoCall() {
       penalty: null,
       userId,
       partidaId: roomId,
+      tipoCubo: "3x3x3"
     };
     solveMutation.mutate(request, {
       onSuccess: () => {

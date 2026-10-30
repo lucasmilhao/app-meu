@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "app-meu",
+    "name": "cubing2gether",
     "slug": "app-meu",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bitcode": false
     },
     "android": {
       "adaptiveIcon": {
@@ -20,7 +21,18 @@
       },
       "softwareKeyboardLayoutMode": "resize",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.CAMERA",
+        "android.permission.INTERNET",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.WAKE_LOCK",
+        "android.permission.BLUETOOTH"
+      ],
+      "package": "com.anonymous.appmeu"
     },
     "web": {
       "output": "static",
@@ -50,39 +62,19 @@
       [
         "expo-font",
         {
-          "fonts": [
-            "./assets/fonts/FiraSans-MediumItalic.ttf"
-          ],
-          "android": {
-            "fonts": [
-              {
-                "fontFamily": "Inter",
-                "fontDefinitions": [
-                  {
-                    "path": "./assets/fonts/Inter-BoldItalic.ttf",
-                    "weight": 700,
-                    "style": "italic"
-                  },
-                  {
-                    "path": "./assets/fonts/Inter-Bold.ttf",
-                    "weight": 700
-                  }
-                ]
-              }
-            ]
-          },
-          "ios": {
-            "fonts": [
-              "./assets/fonts/Inter-Bold.ttf",
-              "./assets/fonts/Inter-BoldItalic.ttf"
-            ]
-          }
+          "fonts": []
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9641b563-e82d-46a2-8e11-8c78b6edb68e"
+      }
     }
   }
 }

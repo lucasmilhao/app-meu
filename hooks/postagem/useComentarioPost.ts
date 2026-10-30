@@ -1,0 +1,28 @@
+import ComentarioProps from "@/app/interface/ComentarioProps";
+import { api } from "@/app/service/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+export interface ComentarioRequest {
+    idPostagem : string,
+    idUsuario: string | undefined,
+    conteudo : string
+}
+
+const fetchData = async (data : ComentarioRequest) : Promise<ComentarioProps> => {
+    const response = await api.post(`/comentario`, data);
+
+    return response.data;
+} 
+
+
+export function useComentarioPost(){
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: fetchData, 
+        retry: 2,
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey : ["postagem-data"]})
+        }
+    })
+}

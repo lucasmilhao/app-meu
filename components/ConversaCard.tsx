@@ -52,7 +52,7 @@ export function ConversaCard({
             style={[
                 styles.container,
                 {
-                    backgroundColor: colors.cardBg,
+                    backgroundColor: colors.bgPrimary,
                     borderBottomColor: colors.borderColor,
                 },
             ]}
