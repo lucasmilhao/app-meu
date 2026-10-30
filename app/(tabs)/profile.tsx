@@ -11,11 +11,13 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { puzzles, formatTime } from "../(tabs)/practice";
 import { useSolveDataUser } from "../../hooks/solves/useSolveDataUser";
 import { useUsuarioLogado } from "../../hooks/usuario/useUsuarioLogado";
+import { useUsuarioLogout } from "../../hooks/usuario/useUsuarioLogout";
 import { useFollowSeguindoData } from "../../hooks/follow/useFollowSeguindoData";
 import { useFollowSeguidoresData } from "../../hooks/follow/useFollowSeguidoresData";
 import {
@@ -66,6 +68,7 @@ export default function Usuario() {
 
   const { data: usuarioLogado, isError: erroUsuario } =
     useUsuarioLogado();
+  const { mutate : logout } = useUsuarioLogout();
 
   const {
     data: usuario,
@@ -92,6 +95,7 @@ export default function Usuario() {
   const { mutate: conversa } = useConversaCreate();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [puzzle, setPuzzle] = useState(puzzles[1]);
   const [nome, setNome] = useState("");
   const [image, setImage] = useState<string | undefined>();
@@ -266,30 +270,60 @@ export default function Usuario() {
       >
         {/* Cabeçalho e ações do perfil */}
         <View style={styles.header}>
-          <View style={styles.profile}>
-            {image ? (
-              <Pressable onPress={() => router.push("/perfil/foto" as never)}>
-                <Image
-                  source={{ uri: image }}
-                  style={styles.avatar}
-                />
-              </Pressable>
-            ) : (
-              <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                <Text style={styles.avatarLetter}>
-                  {(nome || usuario.username || "?").charAt(0).toUpperCase()}
+          <View style={styles.profileRow}>
+            <View style={styles.profile}>
+              {image ? (
+                <Pressable onPress={() => router.push("/perfil/foto" as never)}>
+                  <Image
+                    source={{ uri: image }}
+                    style={styles.avatar}
+                  />
+                </Pressable>
+              ) : (
+                <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                  <Text style={styles.avatarLetter}>
+                    {(nome || usuario.username || "?").charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+              )}
+
+              <View style={styles.nameContainer}>
+                <Text style={styles.name} numberOfLines={2}>
+                  {nome || usuario.username}
                 </Text>
+                {!!usuario.username && (
+                  <Text style={styles.username}>@{usuario.username}</Text>
+                )}
+              </View>
+            </View>
+
+            {isUsuarioLogado && (
+              <View style={styles.profileMenuContainer}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Abrir opções do perfil"
+                  onPress={() => setIsMenuOpen((open) => !open)}
+                  style={styles.profileMenuButton}
+                >
+                  <Ionicons name="ellipsis-vertical" size={22} color={colors.textPrimary} />
+                </Pressable>
+                {isMenuOpen && (
+                  <View style={styles.profileMenu}>
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={() => {
+                        setIsMenuOpen(false);
+                        logout();
+                      }}
+                      style={styles.profileMenuItem}
+                    >
+                      <Ionicons name="log-out-outline" size={18} color={colors.textPrimary} />
+                      <Text style={styles.profileMenuText}>Sair da conta</Text>
+                    </Pressable>
+                  </View>
+                )}
               </View>
             )}
-
-            <View style={styles.nameContainer}>
-              <Text style={styles.name} numberOfLines={2}>
-                {nome || usuario.username}
-              </Text>
-              {!!usuario.username && (
-                <Text style={styles.username}>@{usuario.username}</Text>
-              )}
-            </View>
           </View>
 
           {!isUsuarioLogado && (
@@ -444,7 +478,36 @@ const makeStyles = (c: ThemePalette) =>
       borderWidth: 1,
       borderColor: c.borderColor,
     },
-    profile: { flexDirection: "row", alignItems: "center", gap: 12 },
+    profileRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+    profile: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
+    profileMenuContainer: { position: "relative", zIndex: 1 },
+    profileMenuButton: {
+      width: 40,
+      height: 40,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 20,
+    },
+    profileMenu: {
+      position: "absolute",
+      top: 42,
+      right: 0,
+      width: 150,
+      backgroundColor: c.cardBg,
+      borderWidth: 1,
+      borderColor: c.borderColor,
+      borderRadius: 10,
+      zIndex: 2,
+      elevation: 6,
+    },
+    profileMenuItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+    },
+    profileMenuText: { color: c.textPrimary, fontSize: 14, fontWeight: "600" },
     avatar: {
       width: 68,
       height: 68,

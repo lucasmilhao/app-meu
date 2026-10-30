@@ -43,9 +43,10 @@ export default function Register() {
 
   const [email, setEmail] = useState("");
   const [nome, setNome] = useState("");
+  const [username, setUsername] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [focado, setFocado] = useState<"email" | "senha" | "nome" | null>(null);
+  const [focado, setFocado] = useState<"email" | "senha" | "nome" | "username" | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const senhaRef = useRef<TextInput>(null);
 
@@ -67,7 +68,7 @@ export default function Register() {
 
     setErro(null);
     register.mutate(
-      { email: email.trim(), nome, senha },
+      { email: email.trim(), nome, username, senha },
       {
         onSuccess: () => router.replace("/(tabs)"),
         onError: (e) => setErro(mensagemDeErro(e)),
@@ -125,6 +126,24 @@ export default function Register() {
                 autoCorrect={false}
                 returnKeyType="next"
                 onFocus={() => setFocado("nome")}
+                onBlur={() => setFocado(null)}
+                onSubmitEditing={() => senhaRef.current?.focus()}
+              />
+            </View>
+            
+            <Text style={styles.label}>Username</Text>
+            <View style={[styles.campo, focado === "username" && styles.campoFocado]}>
+              <TextInput
+                style={styles.input}
+                value={username}
+                onChangeText={setUsername}
+                placeholder="joaolucas123"
+                placeholderTextColor={colors.textMuted}
+                keyboardType="default"
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                onFocus={() => setFocado("username")}
                 onBlur={() => setFocado(null)}
                 onSubmitEditing={() => senhaRef.current?.focus()}
               />
