@@ -1,5 +1,6 @@
 import MensagemResponse from "@/app/interface/MensagemResponse";
 import { Palette, ThemePalette } from "@/constants/pallete";
+import { useRouter } from "expo-router";
 import { useMemo } from "react";
 import {
     View,
@@ -9,6 +10,7 @@ import {
     Linking,
     StyleSheet,
     useColorScheme,
+    Pressable,
 } from "react-native";
 
 
@@ -16,6 +18,14 @@ interface MensagemProps extends MensagemResponse {
     isOwnMessage?: boolean;
     onPressProfile?: (username?: string) => void;
 }
+
+const extrairRoomId = (texto: string): string | null => {
+    const match = texto.match(
+        /https:\/\/cubing2gether-2aen\.onrender\.com\/video\/([a-f0-9-]{36})/i
+    );
+
+    return match?.[1] ?? null;
+};
 
 export function Mensagem(props: MensagemProps) {
 
@@ -26,6 +36,18 @@ export function Mensagem(props: MensagemProps) {
 
     const user = props.sender;
     const isOwnMessage = Boolean(props.isOwnMessage);
+    const router = useRouter();
+
+    const roomId = extrairRoomId(props.texto);
+
+    const entrarNaChamada = () => {
+        if (!roomId) return;
+
+        router.push({
+            pathname: "/(screens)/video-call",
+            params: { roomId },
+        });
+    };
 
     const hora = props.mandado
         ? new Date(props.mandado).toLocaleTimeString("pt-BR", {
@@ -125,6 +147,28 @@ export function Mensagem(props: MensagemProps) {
                 {renderTextoComLinks(props.texto ?? "")}
             </Text>
 
+            {roomId && (
+                <Pressable
+                    onPress={entrarNaChamada}
+                    style={{
+                        backgroundColor: colors.accent,
+                        padding: 12,
+                        borderRadius: 12,
+                        alignItems: "center",
+                        marginTop: 8,
+                    }}
+                >
+                    <Text
+                        style={{
+                            color: colors.accentText,
+                            fontWeight: "700",
+                        }}
+                    >
+                        Entrar na chamada
+                    </Text>
+                </Pressable>
+            )}
+
             {/* Horário e status */}
             <View style={styles.footer}>
                 <Text
@@ -187,7 +231,7 @@ function CheckIcon({
     );
 }
 
-const makeStyles = (c : ThemePalette) => StyleSheet.create({
+const makeStyles = (c: ThemePalette) => StyleSheet.create({
     messageContainer: {
         alignSelf: "flex-start",
         maxWidth: "85%",
