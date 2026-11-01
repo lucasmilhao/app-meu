@@ -1,7 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const API_URL = "https://cubing2gether.onrender.com";
+export const API_URL = "https://vw6c70gr-8080.brs.devtunnels.ms";
 
 export const api = axios.create({
     baseURL: API_URL,
