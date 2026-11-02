@@ -28,6 +28,8 @@ function mensagemDeErro(error: unknown) {
       return "Não foi possível conectar ao servidor. Verifique sua conexão.";
     }
     if ([400, 401, 403, 404].includes(error.response.status)) {
+      console.log(error.response.data);
+      
       return "E-mail ou senha incorretos.";
     }
   }

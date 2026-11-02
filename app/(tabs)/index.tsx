@@ -66,7 +66,7 @@ export default function HomeScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.pageTitle}>Conversas</Text>
+          <Text style={styles.pageTitle}>Postagens</Text>
         </View>
 
         <View style={styles.stateContainer}>

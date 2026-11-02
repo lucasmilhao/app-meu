@@ -1,4 +1,5 @@
 
+import * as Notifications from "expo-notifications";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -111,6 +112,15 @@ export default function Usuario() {
     }
   }, [erroUsuario, router]);
 
+  async function testarNotificacao() {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Cubing2Gether",
+        body: "Teste de notificação!",
+      },
+      trigger: null,
+    });
+  }
   useEffect(() => {
     if (!postId) return;
 
@@ -337,7 +347,7 @@ export default function Usuario() {
 
           <Pressable
             disabled={!isUsuarioLogado && carregandoSeguir}
-            onPress={isUsuarioLogado ? handleModal : handleSeguir}
+            onPress={testarNotificacao}
             style={[
               styles.primaryButton,
               !isUsuarioLogado && carregandoSeguir && styles.disabledButton,
