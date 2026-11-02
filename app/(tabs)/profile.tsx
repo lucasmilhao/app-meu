@@ -111,16 +111,7 @@ export default function Usuario() {
       router.replace("/(auth)/login");
     }
   }, [erroUsuario, router]);
-
-  async function testarNotificacao() {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Cubing2Gether",
-        body: "Teste de notificação!",
-      },
-      trigger: null,
-    });
-  }
+  
   useEffect(() => {
     if (!postId) return;
 
@@ -347,7 +338,7 @@ export default function Usuario() {
 
           <Pressable
             disabled={!isUsuarioLogado && carregandoSeguir}
-            onPress={testarNotificacao}
+            onPress={isUsuarioLogado ? handleModal : handleSeguir}
             style={[
               styles.primaryButton,
               !isUsuarioLogado && carregandoSeguir && styles.disabledButton,
