@@ -38,6 +38,8 @@ import { Palette, ThemePalette } from "@/constants/pallete";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SolveChart } from "@/components/SolveChat";
 import { UsuarioModal } from "@/components/UsuarioModal";
+import { useRegisterPush } from "@/hooks/notificacao/useRegisterPush";
+import { registrarPushToken } from "../service/notificacaoService";
 
 const puzzleNames: Record<string, string> = {
   "3x3x3": "THREE",
@@ -105,6 +107,7 @@ export default function Usuario() {
     if (usuario?.nome) setNome(usuario.nome);
     if (usuario?.picture) setImage(usuario.picture);
   }, [usuario?.nome, usuario?.picture]);
+  
 
   useEffect(() => {
     if (erroUsuario) {

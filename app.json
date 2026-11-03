@@ -32,7 +32,9 @@
         "android.permission.WAKE_LOCK",
         "android.permission.BLUETOOTH"
       ],
-      "package": "com.anonymous.appmeu"
+      "package": "com.anonymous.appmeu",
+      "googleServicesFile": "./google-services.json"
+
     },
     "web": {
       "output": "static",

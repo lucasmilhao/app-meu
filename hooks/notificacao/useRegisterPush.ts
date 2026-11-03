@@ -22,7 +22,7 @@ export function useRegisterPush() {
         await api.post("/push-token", {
           token,
         });
-
+        
         console.log("Push token registrado no backend!");
       } catch (error) {
         console.error(

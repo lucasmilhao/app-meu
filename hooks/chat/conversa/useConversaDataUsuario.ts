@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 
 const fetchdata = async (idUsuario : string | undefined) : Promise<ConversaResponseProps[]> => {
     const response = await api.get(`/participantes/usuario/${idUsuario}`);
-    console.log(response.data);
     
 
     return response.data;

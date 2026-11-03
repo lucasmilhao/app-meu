@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1097318241846",
+    "project_id": "cubing2gether-14010",
+    "storage_bucket": "cubing2gether-14010.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1097318241846:android:d58ce06ed07dc866296a97",
+        "android_client_info": {
+          "package_name": "com.anonymous.appmeu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkbQjvbuYxTpDd0LrH9skRwBj2rlbTo4w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

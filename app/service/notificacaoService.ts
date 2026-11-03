@@ -13,9 +13,6 @@ Notifications.setNotificationHandler({
 });
 
 export async function registrarPushToken() {
-  if (!Device.isDevice) {
-    return null;
-  }
 
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync(

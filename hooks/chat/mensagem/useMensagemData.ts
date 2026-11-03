@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const fetchdata = async (idConversa : string | undefined) : Promise<MensagemResponse[]> => {
     const response = await api.get(`/mensagens/${idConversa}`);
-    console.log(response.data);
     
 
     return response.data;
