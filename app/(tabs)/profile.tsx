@@ -256,7 +256,7 @@ export default function Usuario() {
 
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {isOpen && (
         <UsuarioModal
           visible={isOpen}
@@ -458,7 +458,7 @@ export default function Usuario() {
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

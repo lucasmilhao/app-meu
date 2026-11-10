@@ -21,14 +21,22 @@ export default function HomeScreen() {
   const renderPostagem = useCallback<ListRenderItem<PostagemProps>>(({ item }) => (
     <PostCard
       postagem={item}
-      onPressUsuario={() => {
+      onPressUsuario={() =>
         router.push({
           pathname: "/(screens)/user-profile",
           params: {
             username: item.usuario.username,
           },
-        });
-      }}
+        })
+      }
+
+      onPressEditar={(postagem) => router.push({
+        pathname: "/(screens)/postagem-edit",
+        params: { 
+          idPostagem: postagem.id 
+        }
+      })
+      }
 
       onPressComentarios={(postagem) => {
         setIsComentariosOpen(true);
@@ -91,11 +99,11 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.pageTitle}>Postagens</Text>
       </View>
-      {isComentariosOpen && <CommentModal comentarios={postagem?.comentarios} idPostagem={postagem?.id} idUsuario={postagem?.usuario.id} onClose={() => setIsComentariosOpen(false)} visible={isComentariosOpen}/>}
+      {isComentariosOpen && <CommentModal comentarios={postagem?.comentarios} idPostagem={postagem?.id} idUsuario={postagem?.usuario.id} onClose={() => setIsComentariosOpen(false)} visible={isComentariosOpen} />}
 
       <FlatList
         data={postagens ?? []}
@@ -126,7 +134,7 @@ export default function HomeScreen() {
           (!postagens || postagens.length === 0) && styles.emptyList,
         ]}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

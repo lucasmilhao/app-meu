@@ -285,7 +285,7 @@ export default function Practice() {
       : colors.textPrimary;
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
+    <View style={styles.safeArea} >
       <FlatList
         data={recentSolves}
         keyExtractor={(item) => String(item.id)}
@@ -498,7 +498,7 @@ export default function Practice() {
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListFooterComponent={<View style={{ height: 32 }} />}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

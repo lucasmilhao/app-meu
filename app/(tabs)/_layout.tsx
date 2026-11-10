@@ -33,6 +33,13 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name="postagem-editor"
+          options={{
+            title: 'Post',
+            tabBarIcon: ({ color }) => <Ionicons size={28} name="add-circle-sharp" color={color} />,
+          }}
+        />
+        <Tabs.Screen
           name="chat"
           options={{
             title: 'Chat',

@@ -2,6 +2,7 @@ import { api, API_URL } from "@/app/service/api"
 import { useQuery } from "@tanstack/react-query";
 
 export interface ScrambleProps {
+    id?: string | undefined,
     scramble : string,
     svg : string
 }

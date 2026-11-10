@@ -239,7 +239,7 @@ export default function Conversa() {
                         const props: MensagemRequest = {
                             texto: `Junte-se à mim em: https://cubing2gether-2aen.onrender.com/video/${data.idPartida}`,
                             idSender: usuarioLogado?.id,
-                            idConversa: dataConversa.idConversa
+                            idConversa: dataConversa.idConversa,
                         }
 
                         enviaMensagem.mutate(props, {

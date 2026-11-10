@@ -16,10 +16,14 @@ export function useUsuarioLogin() {
     return useMutation({
         mutationFn: fetchdata,
         onSuccess: async () => {
+            console.log("UHUUUUL");
+            
             await Promise.all([
                 queryClient.invalidateQueries({ queryKey: ["usuario-data"] }),
                 queryClient.invalidateQueries({ queryKey: ["usuario-logado-data"] }),
             ]);
-        }
+        },
+        onError: (error : any) => console.log("Deu ruim" ,error)
+        
     });
 }
